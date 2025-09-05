@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct LoginView: View {
+    
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showAlert = false
     @State private var alertMessage = ""
@@ -15,7 +16,7 @@ struct LoginView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.blue.opacity(0.1)
+                Color("main_background")
                     .ignoresSafeArea()
                 
                 Image("ic_spiral")
@@ -29,19 +30,22 @@ struct LoginView: View {
                     .ignoresSafeArea()
                 
                 VStack {
-                    VStack(alignment: .leading, spacing: 30) {
-                        Text("Welcome")
-                            .font(.system(.largeTitle, design: .default, weight: .bold))
+                    VStack(alignment: .leading, spacing: 20) {
+                        Text("WELCOME")
+                            .font(.custom("SF Pro", size: 34))
+                            .fontWeight(.bold)
+                            .foregroundColor(Color("main_text_color"))
                         
-                        Text("Sign in to continue. We will authenticate you securely.")
-                            .font(.system(.body, design: .default, weight: .regular))
+                        Text("Enter your phone number. We will send you an SMS with a confirmation code to this number.")
+                            .font(.custom("SF Pro", size: 14))
+                            .fontWeight(.bold)
+                            .foregroundColor(Color("subtitle_text_color"))
                             .multilineTextAlignment(.leading)
                     }
-                    .padding(.horizontal, 16)
                     
                     Spacer()
                     
-                    VStack(spacing: 16) {
+                    VStack(spacing: 8) {
                         Button(action: {
                             Task {
                                 do {
@@ -53,23 +57,50 @@ struct LoginView: View {
                             }
                         }) {
                             HStack {
-                                Image(systemName: "person.circle")
-                                    .foregroundColor(.black)
-                                Text("Sign In")
-                                    .foregroundColor(.black)
-                                    .font(.system(.body, design: .default, weight: .medium))
+                                Image(systemName: "apple.logo")
+                                    .foregroundColor(Color("main_text_color"))
+                                Text("Continue with Apple")
+                                    .font(.custom("SF Pro", size: 17))
+                                    .fontWeight(.bold)
+                                    .foregroundColor(Color("main_text_color"))
                             }
                             .frame(maxWidth: .infinity)
-                            .frame(height: 50)
+                            .frame(height: 56)
                             .background(Color.white)
-                            .cornerRadius(25)
+                            .cornerRadius(10)
                         }
                         .disabled(authViewModel.isLoading)
                         
-                        Text("By continuing, you agree to Assetsy’s [Terms of Use]() and [Privacy Policy]()")
-                            .font(.system(.caption, design: .default, weight: .regular))
+                        Button(action: {
+                            Task {
+                                do {
+                                    try await authViewModel.authenticate()
+                                } catch {
+                                    alertMessage = error.localizedDescription
+                                    showAlert = true
+                                }
+                            }
+                        }) {
+                            HStack {
+                                Image(systemName: "globe")
+                                    .foregroundColor(Color("main_text_color"))
+                                Text("Continue with Apple")
+                                    .font(.custom("SF Pro", size: 17))
+                                    .fontWeight(.bold)
+                                    .foregroundColor(Color("main_text_color"))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(Color.white)
+                            .cornerRadius(10)
+                        }
+                        .disabled(authViewModel.isLoading)
+                        
+                        Text(attributedString)
+                            .font(.custom("SF Pro", size: 11))
+                            .fontWeight(.bold)
+                            .foregroundColor(Color("subtitle_text_color"))
                             .multilineTextAlignment(.center)
-                            .padding(.horizontal, 20)
                     }
                     .padding(.bottom, 32)
                     
@@ -92,6 +123,11 @@ struct LoginView: View {
                 Text(alertMessage)
             }
         }
+    }
+    
+    private var attributedString: AttributedString {
+        let markdownText = "By continuing, you agree to Assetsy’s [Terms of Use](terms) and [Privacy Policy](privacy)"
+        return try! AttributedString(markdown: markdownText)
     }
 }
 

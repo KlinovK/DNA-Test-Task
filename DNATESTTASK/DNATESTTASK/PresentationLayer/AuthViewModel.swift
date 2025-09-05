@@ -14,7 +14,7 @@ class AuthViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var currentUser: UserModel?
     
-    private let apiService = APIService()
+    private let apiService = FirebaseAuthService(networkClient: URLSessionClient())
     private let tokenManager = TokenManager()
     
     init() {
@@ -22,6 +22,7 @@ class AuthViewModel: ObservableObject {
     }
     
     private func fetchFirebaseIdToken() async throws -> String {
+
         isLoading = true
         defer { isLoading = false }
         
@@ -50,7 +51,7 @@ class AuthViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         
-        let response = try await apiService.authenticateWithFirebase(idToken: idToken)
+        let response = try await apiService.authenticate(idToken: idToken)
         tokenManager.saveToken(response.result.accessToken)
         tokenManager.saveUser(response.result.me)
         currentUser = response.result.me
@@ -60,18 +61,6 @@ class AuthViewModel: ObservableObject {
     public func authenticate() async throws {
         let idToken = try await fetchFirebaseIdToken()
         try await authenticateWithFirebaseIdToken(idToken)
-    }
-    
-    public func signOut() {
-        do {
-            try Auth.auth().signOut()
-            tokenManager.clearToken()
-            tokenManager.clearUser()
-            isAuthenticated = false
-            currentUser = nil
-        } catch {
-            print("Sign out error: \(error.localizedDescription)")
-        }
     }
     
     public func checkAuthenticationStatus() {

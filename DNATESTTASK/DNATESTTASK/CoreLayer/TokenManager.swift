@@ -13,11 +13,11 @@ class TokenManager {
    private let tokenKey = "access_token"
    private let userKey = "current_user"
    
-   func saveToken(_ token: String) {
+   public func saveToken(_ token: String) {
        saveToKeychain(key: tokenKey, data: token.data(using: .utf8)!)
    }
    
-   func getToken() -> String? {
+    public func getToken() -> String? {
        guard let data = getFromKeychain(key: tokenKey),
              let token = String(data: data, encoding: .utf8) else {
            return nil
@@ -25,11 +25,11 @@ class TokenManager {
        return token
    }
    
-   func clearToken() {
+    public func clearToken() {
        deleteFromKeychain(key: tokenKey)
    }
    
-   func saveUser(_ user: UserModel) {
+    public func saveUser(_ user: UserModel) {
        do {
            let userData = try JSONEncoder().encode(user)
            saveToKeychain(key: userKey, data: userData)
@@ -38,7 +38,7 @@ class TokenManager {
        }
    }
    
-   func getCurrentUser() -> UserModel? {
+    public func getCurrentUser() -> UserModel? {
        guard let data = getFromKeychain(key: userKey) else {
            return nil
        }
@@ -51,15 +51,14 @@ class TokenManager {
        }
    }
    
-   func clearUser() {
+    public func clearUser() {
        deleteFromKeychain(key: userKey)
    }
    
-   func hasValidToken() -> Bool {
+    public func hasValidToken() -> Bool {
        return getToken() != nil
    }
    
-   // MARK: - Keychain Methods
    private func saveToKeychain(key: String, data: Data) {
        let query: [String: Any] = [
            kSecClass as String: kSecClassGenericPassword,
